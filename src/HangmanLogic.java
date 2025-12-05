@@ -17,15 +17,18 @@ public class HangmanLogic {
 
     // Check if the letter provided is in the secret word
     public ArrayList<Integer> guessLetter(String letter) {
+        // Guessed positions
         ArrayList<Integer> positions = new ArrayList<>();
+        // Letter guessed
         char guess = letter.charAt(0);
-
+        // Changing the guess state
         StringBuilder newState = new StringBuilder();
 
         for (int i = 0; i < SECRET.length(); i++) {
             char secretChar = SECRET.charAt(i);
             char currentChar = currentWordState.charAt(i * 2); // ignore spaces
 
+            // If the user guessed correctly
             if (secretChar == guess) {
                 positions.add(i);
                 newState.append(secretChar);

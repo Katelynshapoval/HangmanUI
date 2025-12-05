@@ -5,13 +5,12 @@ import java.util.ArrayList;
 public class HangmanUI {
     // Constants
     private final HangmanLogic LOGIC;
-//    private static final Color BG_COLOR = new Color(141, 69, 220);
+    //    private static final Color BG_COLOR = new Color(141, 69, 220);
     private static final Color BG_COLOR = Color.white;
     private int fails = 0;
 
     private JLabel imageLabel;
     private JLabel lettersGuessedLabel;
-    private JPanel hangmanPanel;
 
     // Constructor
     public HangmanUI(HangmanLogic logic) {
@@ -31,18 +30,23 @@ public class HangmanUI {
         // Image panel
         frame.add(hangmanStatusPanel(), BorderLayout.SOUTH);
 
-        frame.setSize(400,600);
+        frame.setSize(400, 600);
 
 //        frame.pack();
         frame.setVisible(true);
     }
 
+    // Pop-up to request a word to guess
     public void requestSecret() {
-        String secretWord = JOptionPane.showInputDialog(null, "Enter the word to guess:");
+        String secretWord = JOptionPane.showInputDialog(null, "Enter the word to guess:").toLowerCase();
+        while (!secretWord.matches("[a-zA-Z]+")) {
+            secretWord = JOptionPane.showInputDialog(null, "Enter a valid word (letters only):").toLowerCase();
+        }
         LOGIC.setSecret(secretWord);
-        System.out.println("User entered: " + secretWord);
+
     }
 
+    // Input fields to enter guesses
     public JPanel guessPanel() {
         JPanel guessPanel = new JPanel();
         guessPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
@@ -59,22 +63,11 @@ public class HangmanUI {
         submitButton.setBorderPainted(false);
         submitButton.setFocusPainted(false);
 
-        submitButton.addActionListener(e -> {
-            String currentGuess = inputField.getText();
-            ArrayList <Integer> positionsGuessed = LOGIC.guessLetter(currentGuess);
+        // Submit button
+        submitButton.addActionListener(e -> processGuess(inputField, submitButton));
 
-            // If the letter is not in the word
-            if (positionsGuessed.isEmpty()) {
-                fails++;
-            }
-            lettersGuessedLabel.setText(LOGIC.getCurrentWordState());
-
-            // Update hangman image
-            String imagePath = "/stages/" + fails + ".png";
-            imageLabel.setIcon(new ImageIcon(getClass().getResource(imagePath)));
-
-            inputField.setText("");
-        });
+        // ENTER key triggers submit
+        inputField.addActionListener(e -> processGuess(inputField, submitButton));
 
         // Add components
         guessPanel.add(inputField);
@@ -82,6 +75,36 @@ public class HangmanUI {
 
         return guessPanel;
     }
+
+    // Process user's guess
+    private void processGuess(JTextField inputField, JButton submitButton) {
+        String currentGuess = inputField.getText().toLowerCase();
+        inputField.setText("");
+
+        if (currentGuess.length() != 1) {
+            JOptionPane.showMessageDialog(null, "Please enter exactly one letter.");
+            return;
+        }
+
+        ArrayList<Integer> positionsGuessed = LOGIC.guessLetter(currentGuess);
+        lettersGuessedLabel.setText(LOGIC.getCurrentWordState());
+
+        // Update hangman image
+        String imagePath = "/stages/" + fails + ".png";
+        imageLabel.setIcon(new ImageIcon(getClass().getResource(imagePath)));
+
+        if (positionsGuessed.isEmpty()) {
+            fails++;
+            if (fails == 8) {
+                endGameMessage(false);
+                submitButton.setEnabled(false);
+            }
+        } else if (checkWin()) {
+            endGameMessage(true);
+            submitButton.setEnabled(false);
+        }
+    }
+
 
     // Image panel for hangman stages
     public JPanel hangmanStatusPanel() {
@@ -101,6 +124,30 @@ public class HangmanUI {
         hangmanPanel.add(lettersGuessedLabel, BorderLayout.NORTH);
 
         return hangmanPanel;
+    }
+
+    // Pop up at the end of the game
+    public void endGameMessage(boolean win) {
+        String message = "";
+        if (win) {
+            message = "You won!";
+        } else {
+            message = "You lost. The secret word: " + LOGIC.getSecret();
+        }
+        JOptionPane.showMessageDialog(null, message);
+
+    }
+
+    // Check is user guessed the complete word
+    public boolean checkWin() {
+        String currentState = LOGIC.getCurrentWordState().replace(" ", "");
+        String secret = LOGIC.getSecret();
+
+        if (currentState.equalsIgnoreCase(secret)) {
+            return true;
+        }
+        return false;
+
     }
 
 
