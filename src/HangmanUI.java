@@ -1,13 +1,17 @@
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 
 public class HangmanUI {
     // Constants
     private final HangmanLogic LOGIC;
-    private final String SECRET_WORD;
-    private static final Color BG_COLOR = new Color(141, 69, 220);
-
+//    private static final Color BG_COLOR = new Color(141, 69, 220);
+    private static final Color BG_COLOR = Color.white;
     private int fails = 0;
+
+    private JLabel imageLabel;
+    private JLabel lettersGuessedLabel;
+    private JPanel hangmanPanel;
 
     // Constructor
     public HangmanUI(HangmanLogic logic) {
@@ -19,19 +23,24 @@ public class HangmanUI {
         frame.setLayout(new BorderLayout());
 
         // Ask for the word to guess
-        this.SECRET_WORD = JOptionPane.showInputDialog(null, "Enter the word to guess:");
-        System.out.println("User entered: " + SECRET_WORD);
+        requestSecret();
 
         // Guess panel
-        frame.add(guessPanel());
+        frame.add(guessPanel(), BorderLayout.NORTH);
 
-        ImageIcon image = new ImageIcon(getClass().getResource("/stages/1.png"));
-        JLabel label = new JLabel(image);
-        frame.add(label);
+        // Image panel
+        frame.add(hangmanStatusPanel(), BorderLayout.SOUTH);
+
         frame.setSize(400,600);
 
 //        frame.pack();
         frame.setVisible(true);
+    }
+
+    public void requestSecret() {
+        String secretWord = JOptionPane.showInputDialog(null, "Enter the word to guess:");
+        LOGIC.setSecret(secretWord);
+        System.out.println("User entered: " + secretWord);
     }
 
     public JPanel guessPanel() {
@@ -45,6 +54,27 @@ public class HangmanUI {
         // Submit button
         JButton submitButton = new JButton("Submit");
         submitButton.setPreferredSize(new Dimension(80, 30));
+        submitButton.setBackground(Color.WHITE);
+        submitButton.setContentAreaFilled(true);
+        submitButton.setBorderPainted(false);
+        submitButton.setFocusPainted(false);
+
+        submitButton.addActionListener(e -> {
+            String currentGuess = inputField.getText();
+            ArrayList <Integer> positionsGuessed = LOGIC.guessLetter(currentGuess);
+
+            // If the letter is not in the word
+            if (positionsGuessed.isEmpty()) {
+                fails++;
+            }
+            lettersGuessedLabel.setText(LOGIC.getCurrentWordState());
+
+            // Update hangman image
+            String imagePath = "/stages/" + fails + ".png";
+            imageLabel.setIcon(new ImageIcon(getClass().getResource(imagePath)));
+
+            inputField.setText("");
+        });
 
         // Add components
         guessPanel.add(inputField);
@@ -53,9 +83,25 @@ public class HangmanUI {
         return guessPanel;
     }
 
-    public JPanel imagePanel() {
-        JPanel imagePanel = new JPanel(new FlowLayout());
-        return imagePanel;
+    // Image panel for hangman stages
+    public JPanel hangmanStatusPanel() {
+        JPanel hangmanPanel = new JPanel(new BorderLayout());
+        hangmanPanel.setBackground(BG_COLOR);
+
+        // Image
+        imageLabel = new JLabel(new ImageIcon(getClass().getResource("/stages/0.png")));
+
+        // Status
+        lettersGuessedLabel = new JLabel(LOGIC.getCurrentWordState());
+        // Center the text
+        lettersGuessedLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+        // Adding
+        hangmanPanel.add(imageLabel, BorderLayout.SOUTH);
+        hangmanPanel.add(lettersGuessedLabel, BorderLayout.NORTH);
+
+        return hangmanPanel;
     }
+
 
 }
