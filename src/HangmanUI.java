@@ -122,6 +122,7 @@ public class HangmanUI {
         else if (checkWin()) {
             endGameMessage(true);
             submitButton.setEnabled(false);
+            inputField.setEnabled(false);
         }
 
         // Update hangman image
