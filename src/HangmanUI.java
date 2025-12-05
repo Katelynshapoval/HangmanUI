@@ -89,7 +89,7 @@ public class HangmanUI {
     // Pop-up to request a word to guess
     public void requestSecret() {
         String secretWord = JOptionPane.showInputDialog(null, "Enter the word to guess:").toLowerCase();
-        while (!secretWord.matches("[a-zA-Z]+")) {
+        while (!secretWord.matches("[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ]+")) {
             secretWord = JOptionPane.showInputDialog(null, "Enter a valid word (letters only):").toLowerCase();
         }
         LOGIC.setSecret(secretWord);
@@ -102,7 +102,7 @@ public class HangmanUI {
         inputField.setText("");
 
         // To make sure user enters only one letter
-        if (currentGuess.length() != 1) {
+        if (currentGuess.length() != 1 || !currentGuess.matches("[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ]+")) {
             JOptionPane.showMessageDialog(null, "Please enter exactly one letter.");
             return;
         }
