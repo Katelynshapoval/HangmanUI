@@ -1,24 +1,18 @@
 import java.util.ArrayList;
 
 public class HangmanLogic {
-    private final int WORD_LENGTH;
     private String SECRET;
     private String currentWordState;
 
     // Constructor
-    public HangmanLogic(int wordLength) {
-        this.WORD_LENGTH = wordLength;
-    }
-
-    // Get the secret word length
-    public int getWordLength() {
-        return WORD_LENGTH;
+    public HangmanLogic() {
     }
 
     // Check if the letter provided is in the secret word
-    public ArrayList<Integer> guessLetter(String letter) {
+    public boolean guessLetter(String letter) {
         // Guessed positions
-        ArrayList<Integer> positions = new ArrayList<>();
+        boolean guessed = false;
+
         // Letter guessed
         char guess = letter.charAt(0);
         // Changing the guess state
@@ -30,7 +24,7 @@ public class HangmanLogic {
 
             // If the user guessed correctly
             if (secretChar == guess) {
-                positions.add(i);
+                guessed = true;
                 newState.append(secretChar);
             } else {
                 newState.append(currentChar); // keep previously revealed letter or _
@@ -39,7 +33,7 @@ public class HangmanLogic {
         }
 
         currentWordState = newState.toString();
-        return positions;
+        return guessed;
     }
 
     // Set the value of a secret word
@@ -60,6 +54,7 @@ public class HangmanLogic {
         return SECRET;
     }
 
+    // Letters that have been guessed (Example: "h _ e l l _")
     public String getCurrentWordState() {
         return currentWordState;
     }

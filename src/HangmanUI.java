@@ -36,16 +36,6 @@ public class HangmanUI {
         frame.setVisible(true);
     }
 
-    // Pop-up to request a word to guess
-    public void requestSecret() {
-        String secretWord = JOptionPane.showInputDialog(null, "Enter the word to guess:").toLowerCase();
-        while (!secretWord.matches("[a-zA-Z]+")) {
-            secretWord = JOptionPane.showInputDialog(null, "Enter a valid word (letters only):").toLowerCase();
-        }
-        LOGIC.setSecret(secretWord);
-
-    }
-
     // Input fields to enter guesses
     public JPanel guessPanel() {
         JPanel guessPanel = new JPanel();
@@ -76,36 +66,6 @@ public class HangmanUI {
         return guessPanel;
     }
 
-    // Process user's guess
-    private void processGuess(JTextField inputField, JButton submitButton) {
-        String currentGuess = inputField.getText().toLowerCase();
-        inputField.setText("");
-
-        if (currentGuess.length() != 1) {
-            JOptionPane.showMessageDialog(null, "Please enter exactly one letter.");
-            return;
-        }
-
-        ArrayList<Integer> positionsGuessed = LOGIC.guessLetter(currentGuess);
-        lettersGuessedLabel.setText(LOGIC.getCurrentWordState());
-
-        // Update hangman image
-        String imagePath = "/stages/" + fails + ".png";
-        imageLabel.setIcon(new ImageIcon(getClass().getResource(imagePath)));
-
-        if (positionsGuessed.isEmpty()) {
-            fails++;
-            if (fails == 8) {
-                endGameMessage(false);
-                submitButton.setEnabled(false);
-            }
-        } else if (checkWin()) {
-            endGameMessage(true);
-            submitButton.setEnabled(false);
-        }
-    }
-
-
     // Image panel for hangman stages
     public JPanel hangmanStatusPanel() {
         JPanel hangmanPanel = new JPanel(new BorderLayout());
@@ -124,6 +84,49 @@ public class HangmanUI {
         hangmanPanel.add(lettersGuessedLabel, BorderLayout.NORTH);
 
         return hangmanPanel;
+    }
+
+    // Pop-up to request a word to guess
+    public void requestSecret() {
+        String secretWord = JOptionPane.showInputDialog(null, "Enter the word to guess:").toLowerCase();
+        while (!secretWord.matches("[a-zA-Z]+")) {
+            secretWord = JOptionPane.showInputDialog(null, "Enter a valid word (letters only):").toLowerCase();
+        }
+        LOGIC.setSecret(secretWord);
+
+    }
+
+    // Process user's guess
+    private void processGuess(JTextField inputField, JButton submitButton) {
+        String currentGuess = inputField.getText().toLowerCase();
+        inputField.setText("");
+
+        // To make sure user enters only one letter
+        if (currentGuess.length() != 1) {
+            JOptionPane.showMessageDialog(null, "Please enter exactly one letter.");
+            return;
+        }
+
+        boolean guessed = LOGIC.guessLetter(currentGuess);
+        lettersGuessedLabel.setText(LOGIC.getCurrentWordState());
+
+        // If the guess is wrong
+        if (!guessed) {
+            fails++;
+            if (fails == 8) {
+                endGameMessage(false);
+                submitButton.setEnabled(false);
+            }
+        }
+        // If user won
+        else if (checkWin()) {
+            endGameMessage(true);
+            submitButton.setEnabled(false);
+        }
+
+        // Update hangman image
+        String imagePath = "/stages/" + fails + ".png";
+        imageLabel.setIcon(new ImageIcon(getClass().getResource(imagePath)));
     }
 
     // Pop up at the end of the game
